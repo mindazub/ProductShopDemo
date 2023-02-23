@@ -62,5 +62,14 @@ namespace ProductShopDemo.Services
                 .ToListAsync();
             return new PagedResult<Product>(products, totalItems, pageNumber, pageSize);
         }
+        public async Task<List<ProductType>> GetProductTypes()
+        {
+            return await _context.ProductTypes.ToListAsync();
+        }
+
+        public async Task<List<ProductSubtype>> GetProductSubtypes()
+        {
+            return await _context.ProductSubtypes.ToListAsync();
+        }
     }
 }

@@ -12,5 +12,9 @@ namespace ProductShopDemo.Services
         Task CreateProduct(Product product);
         Task UpdateProduct(Product product);
         Task DeleteProduct(int id);
+        //
+        Task<List<ProductType>> GetProductTypes();
+        Task<List<ProductSubtype>> GetProductSubtypes();
+        //
     }
 }
