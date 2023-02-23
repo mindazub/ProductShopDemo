@@ -49,5 +49,18 @@ namespace ProductShopDemo.Services
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<PagedResult<Product>> GetProductsPaged(int pageNumber, int pageSize)
+        {
+            var totalItems = await _context.Products.CountAsync();
+            var products = await _context.Products
+                .Include(p => p.ProductSubtype)
+                    .ThenInclude(s => s.ProductType)
+                .OrderBy(p => p.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<Product>(products, totalItems, pageNumber, pageSize);
+        }
     }
 }

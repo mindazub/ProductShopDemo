@@ -15,5 +15,14 @@ namespace ProductShopDemo.Data
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<Product> Products { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ProductSubtype>()
+                .HasOne(s => s.ProductType)
+                .WithMany(t => t.ProductSubtypes)
+                .HasForeignKey(s => s.ProductTypeId);
+        }
+
     }
 }
