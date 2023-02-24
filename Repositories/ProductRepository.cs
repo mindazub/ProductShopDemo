@@ -1,31 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProductShopDemo.Data;
 using ProductShopDemo.Models;
-using ProductShopDemo.Repositories;
 
-namespace ProductShopDemo.Services
+namespace ProductShopDemo.Repositories
 {
-    public class ProductService : IProductService
+    public class ProductRepository : IProductRepository
     {
-        private readonly IProductRepository _productRepository;
+        private readonly ApplicationDbContext _context;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductRepository(ApplicationDbContext context)
         {
-            _productRepository = productRepository;
+            _context = context;
         }
 
         public async Task<List<Product>> GetProducts(int pageNumber, int pageSize)
         {
-            return await _productRepository.GetProducts(pageNumber, pageSize);
+            return await _context.Products
+                .Include(p => p.ProductSubtype)
+                .ThenInclude(s => s.ProductType)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<Product> GetProductById(int id)
         {
-            return await _productRepository.GetProductById(id);
+            return await _context.Products
+                .Include(p => p.ProductSubtype)
+                .ThenInclude(s => s.ProductType)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task CreateProduct(Product product)
         {
-            await _productRepository.Add(product);
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateProduct(Product product)
@@ -64,3 +73,4 @@ namespace ProductShopDemo.Services
         }
     }
 }
+
