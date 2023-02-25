@@ -1,0 +1,48 @@
+﻿@page "/adminproducts/edit/{id:int}"
+@using ProductShopDemo.Models;
+@using ProductShopDemo.Services;
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+
+<h1>Edit Product</h1>
+
+@if (product == null)
+{
+        <p>Loading...</p>
+}
+else
+{@*
+        <form>
+            <div class="form-group">
+                <label for="nameInput">Name</label>
+                <input type="text" class="form-control" id="nameInput" @bind-value="product.Name" />
+            </div>
+            <div class="form-group">
+                <label for="descriptionInput">Description</label>
+                <input type="text" class="form-control" id="descriptionInput" @bind-value="product.Description" />
+            </div>
+            <div class="form-group">
+                <label for="priceInput">Price</label>
+                <input type="text" class="form-control" id="priceInput" @bind-value="product.Price" />
+            </div>
+            <button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save</button>
+        </form>*@
+}
+
+@code {
+    Product product = new Product();
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetProductAsync(Id);
+    }
+
+    private async Task HandleSubmit()
+    {
+        await ProductService.UpdateProductAsync(product);
+        NavigationManager.NavigateTo("/adminproducts");
+    }
+}

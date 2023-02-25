@@ -1,0 +1,69 @@
+﻿@page "/adminproducts/create"
+@using ProductShopDemo.Models
+@using ProductShopDemo.Services
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+
+<h3>Create Product</h3>
+
+<form method="post" action="/adminproducts/create">
+    <div class="form-group">
+        <label asp-for="product.Name">Name:</label>
+        <input type="text" class="form-control" id="name" asp-for="product.Name">
+    </div>
+    <div class="form-group">
+        <label asp-for="product.Description">Description:</label>
+        <input type="text" class="form-control" id="description" asp-for="product.Description">
+    </div>
+    <div class="form-group">
+        <label asp-for="product.Price">Price:</label>
+        <input type="number" class="form-control" id="price" asp-for="product.Price">
+    </div>
+    <div class="form-group">
+        <label asp-for="product.ProductType">Product Type:</label>
+        <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
+            <option value="#">--- Select Product Type --- </option>
+            @foreach (var productType in productTypes)
+            {
+                <option value="@productType.Id">@productType.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="product.ProductSubtype">Product Subtype:</label>
+        <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
+            @foreach (var productSubtype in subtypesForSelectedType)
+            {
+                <option value="@productSubtype.Id">@productSubtype.Name</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+@code {
+    private Product product = new Product();
+    private List<ProductType> productTypes = new List<ProductType>();
+    private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
+    private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        productTypes = await ProductService.GetProductTypesAsync();
+        allProductSubtypes = await ProductService.GetProductSubtypesAsync();
+        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == product.ProductSubtype?.ProductType?.Id).ToList();
+    }
+
+    private async Task CreateProduct()
+    {
+        await ProductService.CreateProductAsync(product);
+        NavigationManager.NavigateTo("/adminproducts");
+    }
+
+    private void OnProductTypeChanged(ChangeEventArgs e)
+    {
+        int productTypeId = Convert.ToInt32(e.Value);
+        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productTypeId).ToList();
+        product.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
+    }
+}

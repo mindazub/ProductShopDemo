@@ -54,6 +54,27 @@ namespace ProductShopDemo.Repositories
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ProductType> GetProductTypeByIdAsync(int id)
+        {
+            return await _context.ProductTypes.FindAsync(id);
+        }
+
+        public async Task<List<ProductType>> GetProductTypesAsync()
+        {
+            return await _context.ProductTypes.ToListAsync();
+        }
+
+        public async Task<ProductSubtype> GetProductSubtypeByIdAsync(int id)
+        {
+            return await _context.ProductSubtypes.FindAsync(id);
+        }
+
+        public async Task<List<ProductSubtype>> GetProductSubtypesAsync()
+        {
+            return await _context.ProductSubtypes.ToListAsync();
+
+        }
     }
 }
 

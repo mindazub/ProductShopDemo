@@ -51,6 +51,17 @@ namespace ProductShopDemo.Services
 
             return new PaginationResult<Product>(products, totalPages, page, pageSize);
         }
+
+        public async Task<List<ProductType>> GetProductTypesAsync()
+        {
+            return await _repository.GetProductTypesAsync();
+        }
+
+        public async Task<List<ProductSubtype>> GetProductSubtypesAsync()
+        {
+            return await _repository.GetProductSubtypesAsync();
+        }
+
     }
 
 }

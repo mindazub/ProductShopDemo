@@ -1,15 +1,15 @@
 ﻿@page "/adminproducts"
-@using ProductShopDemo.Models
-@using ProductShopDemo.Services
-@using Microsoft.AspNetCore.WebUtilities
+@using ProductShopDemo.Models;
+@using ProductShopDemo.Services;
+@using Microsoft.AspNetCore.WebUtilities;
 @inject NavigationManager NavigationManager
-
-
 @inject IProductService ProductService
 
+
 <h1>Products</h1>
-
-
+<br />
+<a href="/adminproducts/create" class="btn btn-primary">Create</a>
+<br/>
     <table class="table">
         <thead>
             <tr>
