@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using ProductShopDemo.Areas.Identity;
 using ProductShopDemo.Data;
+using ProductShopDemo.Models;
 using ProductShopDemo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +25,27 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+//
 
 var app = builder.Build();
+
+
+// Seed the database with initial data.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+
+    if (context.Database.IsSqlServer() && !context.Products.Any())
+    {
+        context.Database.Migrate();
+        SeedData.Initialize(services);
+    }
+}
+
+
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

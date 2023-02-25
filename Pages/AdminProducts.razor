@@ -1,101 +1,92 @@
-﻿@page "/adminproducts"
-@using ProductShopDemo.Models;
-@using ProductShopDemo.Services;
+﻿@page "/products"
+@using ProductShopDemo.Models
+@using ProductShopDemo.Services
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager NavigationManager
+
+
 @inject IProductService ProductService
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
+<h1>Products</h1>
 
-<h1>Admin Products</h1>
-
-@if (pagedResult == null)
+@if (Model.Items.Count == 0)
 {
-    <p><em>Loading...</em></p>
-}
-else if (pagedResult.Items.Count == 0)
-{
-    <p><em>No products found.</em></p>
+    <p>No products found.</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Name</th>
                 <th>Price</th>
                 <th>Description</th>
-                <th>Subtype</th>
                 <th>Type</th>
-                <th></th>
+                <th>Subtype</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var product in pagedResult.Items)
+            @foreach (var product in Model.Items)
             {
                 <tr>
-                    <td>@product.Id</td>
                     <td>@product.Name</td>
                     <td>@product.Price</td>
                     <td>@product.Description</td>
-                    <td>@product.ProductSubtype.Name</td>
                     <td>@product.ProductSubtype.ProductType.Name</td>
-                    <td>
-                        <a href="@($"products/{product.Id}")">Details</a>
-                        <a href="@($"products/edit/{product.Id}")">Edit</a>
-                        <button class="btn btn-danger btn-sm" @onclick="(() => Delete(product.Id))">Delete</button>
-                    </td>
+                    <td>@product.ProductSubtype.Name</td>
                 </tr>
             }
         </tbody>
     </table>
-    <div class="d-flex justify-content-between">
-        @if (pagedResult.HasPreviousPage)
-        {
-            <button class="btn btn-primary" @onclick="PreviousPage">Previous</button>
-        }
-        <span>Page @pagedResult.PageIndex of @pagedResult.TotalPages</span>
-        @if (pagedResult.HasNextPage)
-        {
-            <button class="btn btn-primary" @onclick="NextPage">Next</button>
-        }
-    </div>
+}
+
+
+    <nav>
+        <ul class="pagination">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item"><a class="page-link" href="@GetPageUrl(Model.PageIndex - 1)">Previous</a></li>
+            }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                if (i == Model.PageIndex)
+                {
+                    <li class="page-item active"><span class="page-link">@i</span></li>
+                }
+                else
+                {
+                    <li class="page-item"><a class="page-link" href="@GetPageUrl(i)">@i</a></li>
+                }
+            }
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item"><a class="page-link" href="@GetPageUrl(Model.PageIndex + 1)">Next</a></li>
+            }
+        </ul>
+    </nav>
 }
 
 @code {
-    private PagedResult<Product> pagedResult;
-    private const int PAGE_SIZE = 10;
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
     }
 
-    private async Task LoadData(int pageNumber = 1)
+    private async Task LoadData()
     {
-        pagedResult = await ProductService.GetProductsPaged(pageNumber, PAGE_SIZE);
+        Model = await ProductService.GetProductsAsync(Page, 10);
     }
 
-    private async Task NextPage()
+    private string GetPageUrl(int pageIndex)
     {
-        await LoadData(pagedResult.PageIndex + 1);
-    }
-
-    private async Task PreviousPage()
-    {
-        await LoadData(pagedResult.PageIndex - 1);
-    }
-
-    private async Task Delete(int id)
-    {
-        //bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product?");
-        //bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
-        //if (confirm)
-        //{
-        //    await ProductService.DeleteProduct(id);
-        //    await LoadData();
-        //}
-
-        await ProductService.DeleteProduct(id);
-        await LoadData();
+        var uri = new Uri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        query["page"] = pageIndex.ToString();
+        return uri.GetLeftPart(UriPartial.Path) + QueryString.Create(query);
     }
 }

@@ -4,17 +4,11 @@ namespace ProductShopDemo.Services
 {
     public interface IProductService
     {
-        Task<List<Product>> GetProducts(int pageNumber, int pageSize);
-        //
-        Task<PagedResult<Product>> GetProductsPaged(int pageNumber, int pageSize);
-        //
-        Task<Product> GetProductById(int id);
-        Task CreateProduct(Product product);
-        Task UpdateProduct(Product product);
-        Task DeleteProduct(int id);
-        //
-        Task<List<ProductType>> GetProductTypes();
-        Task<List<ProductSubtype>> GetProductSubtypes();
-        //
+        Task<PaginationResult<Product>> GetProductsAsync(int page);
+        Task<Product> GetProductAsync(int id);
+        Task CreateProductAsync(Product product);
+        Task UpdateProductAsync(Product product);
+        Task DeleteProductAsync(int id);
     }
+
 }

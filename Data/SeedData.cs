@@ -1,76 +1,67 @@
-﻿using ProductShopDemo.Models;
+﻿
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ProductShopDemo.Models;
+using System;
+using System.Linq;
 
 namespace ProductShopDemo.Data
 {
     public static class SeedData
     {
-        public static async Task Initialize(ApplicationDbContext context)
+        public static void Initialize(IServiceProvider serviceProvider)
         {
-            if (!context.Products.Any())
+            using (var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                var productTypes = new List<ProductType>
-            {
-                new ProductType
+                // Check if there are any products in the database
+                if (context.Products.Any())
                 {
-                    Name = "Food",
-                    ProductSubtypes = new List<ProductSubtype>
-                    {
-                        new ProductSubtype { Name = "Milk" },
-                        new ProductSubtype { Name = "Bread" },
-                        new ProductSubtype { Name = "Cheese" }
-                    }
-                },
-                new ProductType
-                {
-                    Name = "Electronics",
-                    ProductSubtypes = new List<ProductSubtype>
-                    {
-                        new ProductSubtype { Name = "Mobile" },
-                        new ProductSubtype { Name = "Computer" },
-                        new ProductSubtype { Name = "Appliances" }
-                    }
-                },
-                new ProductType
-                {
-                    Name = "Furniture",
-                    ProductSubtypes = new List<ProductSubtype>
-                    {
-                        new ProductSubtype { Name = "Chair" },
-                        new ProductSubtype { Name = "Table" },
-                        new ProductSubtype { Name = "Wardrobe" }
-                    }
+                    return; // Database has already been seeded
                 }
-            };
 
-                await context.ProductTypes.AddRangeAsync(productTypes);
+                // Seed the database with 15 products
+                var foodType = new ProductType { Name = "Food" };
+                var electronicsType = new ProductType { Name = "Electronics" };
+                var furnitureType = new ProductType { Name = "Furniture" };
+                context.ProductTypes.AddRange(foodType, electronicsType, furnitureType);
 
-                var products = new List<Product>
-            {
-                new Product { Name = "Whole Milk", Price = 2.50M, Description = "A gallon of whole milk.", ProductSubtypeId = 1 },
-                new Product { Name = "Wheat Bread", Price = 1.75M, Description = "A loaf of wheat bread.", ProductSubtypeId = 2 },
-                new Product { Name = "Cheddar Cheese", Price = 3.00M, Description = "A block of cheddar cheese.", ProductSubtypeId = 3 },
-                new Product { Name = "iPhone 13", Price = 999.00M, Description = "The latest iPhone.", ProductSubtypeId = 4 },
-                new Product { Name = "Dell Inspiron 15", Price = 899.00M, Description = "The latest Dell Inspiron.", ProductSubtypeId = 4 },
-                new Product { Name = "Refrigerator", Price = 799.00M, Description = "A large refrigerator.", ProductSubtypeId = 6 },
-                new Product { Name = "Armchair", Price = 199.00M, Description = "A comfortable armchair.", ProductSubtypeId = 7 },
-                new Product { Name = "Kitchen Table", Price = 399.00M, Description = "A large kitchen table.", ProductSubtypeId = 8 },
-                new Product { Name = "Wardrobe", Price = 599.00M, Description = "A large wardrobe.", ProductSubtypeId = 9 },
-                new Product { Name = "2% Milk", Price = 2.25M, Description = "A gallon of 2% milk.", ProductSubtypeId = 1 },
-                new Product { Name = "White Bread", Price = 1.50M, Description = "A loaf of white bread.", ProductSubtypeId = 2 },
-                new Product { Name = "Swiss Cheese", Price = 2.50M, Description = "A block of swiss cheese.", ProductSubtypeId = 3 },
-                new Product { Name = "Samsung Galaxy S21", Price = 799.00M, Description = "A top-of-the-line Samsung phone.", ProductSubtypeId = 4 },
-                new Product { Name = "HP Pavilion", Price = 799.00M, Description = "A budget-friendly HP laptop.", ProductSubtypeId = 5 },
-                new Product { Name = "Washing Machine", Price = 499.00M, Description = "A top-loading washing machine.", ProductSubtypeId = 6 },
-                new Product { Name = "Sofa", Price = 499.00M, Description = "A large sofa.", ProductSubtypeId = 7 },
-                new Product { Name = "Coffee Table", Price = 199.00M, Description = "A small coffee table.", ProductSubtypeId = 8 },
-                new Product { Name = "Dresser", Price = 299.00M, Description = "A large dresser.", ProductSubtypeId = 9 }
-            };
+                var milkSubtype = new ProductSubtype { Name = "Milk", ProductType = foodType };
+                var breadSubtype = new ProductSubtype { Name = "Bread", ProductType = foodType };
+                var cheeseSubtype = new ProductSubtype { Name = "Cheese", ProductType = foodType };
+                var mobileSubtype = new ProductSubtype { Name = "Mobile", ProductType = electronicsType };
+                var computerSubtype = new ProductSubtype { Name = "Computer", ProductType = electronicsType };
+                var appliancesSubtype = new ProductSubtype { Name = "Appliances", ProductType = electronicsType };
+                var chairSubtype = new ProductSubtype { Name = "Chair", ProductType = furnitureType };
+                var tableSubtype = new ProductSubtype { Name = "Table", ProductType = furnitureType };
+                var wardrobeSubtype = new ProductSubtype { Name = "Wardrobe", ProductType = furnitureType };
+                context.ProductSubtypes.AddRange(milkSubtype, breadSubtype, cheeseSubtype, mobileSubtype, computerSubtype, appliancesSubtype, chairSubtype, tableSubtype, wardrobeSubtype);
 
-                await context.Products.AddRangeAsync(products);
+                var products = new[]
+                {
+                    new Product { Name = "Whole Milk", Price = 2.99m, Description = "Gallon of whole milk", ProductSubtype = milkSubtype },
+                    new Product { Name = "Sourdough Bread", Price = 4.99m, Description = "Loaf of sourdough bread", ProductSubtype = breadSubtype },
+                    new Product { Name = "Cheddar Cheese", Price = 3.99m, Description = "Block of cheddar cheese", ProductSubtype = cheeseSubtype },
+                    new Product { Name = "iPhone 13", Price = 999.99m, Description = "Apple iPhone 13", ProductSubtype = mobileSubtype },
+                    new Product { Name = "MacBook Pro", Price = 1999.99m, Description = "Apple MacBook Pro", ProductSubtype = computerSubtype },
+                    new Product { Name = "Microwave", Price = 149.99m, Description = "Kitchen microwave", ProductSubtype = appliancesSubtype },
+                    new Product { Name = "Recliner Chair", Price = 499.99m, Description = "Leather recliner chair", ProductSubtype = chairSubtype },
+                    new Product { Name = "Dining Table", Price = 799.99m, Description = "Solid wood dining table", ProductSubtype = tableSubtype },
+                    new Product { Name = "Wardrobe Closet", Price = 599.99m, Description = "Three-door wardrobe closet", ProductSubtype = wardrobeSubtype },
+                    new Product { Name = "2% Milk", Price = 2.49m, Description = "Gallon of 2% milk", ProductSubtype = milkSubtype },
+                    new Product { Name = "Baguette Bread", Price = 3.99m, Description = "French baguette bread", ProductSubtype = breadSubtype },
+                    new Product { Name = "Swiss Cheese", Price = 4.99m, Description = "Block of swiss cheese", ProductSubtype = cheeseSubtype },
+                    new Product { Name = "Samsung Galaxy S21", Price = 799.99m, Description = "Samsung Galaxy S21", ProductSubtype = mobileSubtype },
+                    new Product { Name = "Dell XPS 13", Price = 1499.99m, Description = "Dell XPS 13 laptop", ProductSubtype = computerSubtype },
+                    new Product { Name = "Toaster", Price = 49.99m, Description = "Kitchen toaster", ProductSubtype = appliancesSubtype },
+                    };
+                context.Products.AddRange(products);
 
-                await context.SaveChangesAsync();
+                context.SaveChanges();
             }
         }
     }
 
 }
+
+

@@ -13,64 +13,48 @@ namespace ProductShopDemo.Repositories
             _context = context;
         }
 
-        public async Task<List<Product>> GetProducts(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int itemsPerPage)
         {
             return await _context.Products
                 .Include(p => p.ProductSubtype)
-                .ThenInclude(s => s.ProductType)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                    .ThenInclude(s => s.ProductType)
+                .Skip((page - 1) * itemsPerPage)
+                .Take(itemsPerPage)
                 .ToListAsync();
         }
 
-        public async Task<Product> GetProductById(int id)
+        public async Task<int> GetProductsCountAsync()
+        {
+            return await _context.Products.CountAsync();
+        }
+
+        public async Task<Product> GetProductAsync(int id)
         {
             return await _context.Products
                 .Include(p => p.ProductSubtype)
-                .ThenInclude(s => s.ProductType)
+                    .ThenInclude(s => s.ProductType)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task CreateProduct(Product product)
+        public async Task CreateProductAsync(Product product)
         {
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateProduct(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteProduct(int id)
+        public async Task DeleteProductAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await GetProductAsync(id);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<PagedResult<Product>> GetProductsPaged(int pageNumber, int pageSize)
-        {
-            var totalItems = await _context.Products.CountAsync();
-            var products = await _context.Products
-                .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
-                .OrderBy(p => p.Id)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-            return new PagedResult<Product>(products, totalItems, pageNumber, pageSize);
-        }
-        public async Task<List<ProductType>> GetProductTypes()
-        {
-            return await _context.ProductTypes.ToListAsync();
-        }
-
-        public async Task<List<ProductSubtype>> GetProductSubtypes()
-        {
-            return await _context.ProductSubtypes.ToListAsync();
-        }
     }
 }
+
 

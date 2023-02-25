@@ -9,25 +9,30 @@ namespace ProductShopDemo.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductService _productService;
+        private readonly IProductService _service;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService service)
         {
-            _productService = productService;
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<PaginationResult<Product>>> GetProducts(int page = 1)
         {
-            var products = await _productService.GetProducts(pageNumber, pageSize);
+            var result = await _service.GetProductsAsync(page);
 
-            return Ok(products);
+            if (result.TotalPages < page)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProductById(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _productService.GetProductById(id);
+            var product = await _service.GetProductAsync(id);
 
             if (product == null)
             {
@@ -37,32 +42,31 @@ namespace ProductShopDemo.Controllers
             return Ok(product);
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(Product product)
+        public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            await _productService.CreateProduct(product);
+            await _service.CreateProductAsync(product);
 
-            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, Product product)
+        public async Task<ActionResult<Product>> UpdateProduct(int id, Product product)
         {
             if (id != product.Id)
             {
                 return BadRequest();
             }
 
-            await _productService.UpdateProduct(product);
+            await _service.UpdateProductAsync(product);
 
-            return NoContent();
+            return Ok(product);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(int id)
         {
-            await _productService.DeleteProduct(id);
+            await _service.DeleteProductAsync(id);
 
             return NoContent();
         }

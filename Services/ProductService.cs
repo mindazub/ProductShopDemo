@@ -6,61 +6,52 @@ namespace ProductShopDemo.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductRepository _repository;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository repository)
         {
-            _productRepository = productRepository;
+            _repository = repository;
         }
 
-        public async Task<List<Product>> GetProducts(int pageNumber, int pageSize)
+        public async Task<PaginationResult<Product>> GetProductsAsync(int page)
         {
-            return await _productRepository.GetProducts(pageNumber, pageSize);
+            var itemsPerPage = 10;
+            var totalItems = await _repository.GetProductsCountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalItems / itemsPerPage);
+            var products = await _repository.GetProductsAsync(page, itemsPerPage);
+
+            return new PaginationResult<Product>(products, totalPages, page, itemsPerPage);
         }
 
-        public async Task<Product> GetProductById(int id)
+        public async Task<Product> GetProductAsync(int id)
         {
-            return await _productRepository.GetProductById(id);
+            return await _repository.GetProductAsync(id);
         }
 
-        public async Task CreateProduct(Product product)
+        public async Task CreateProductAsync(Product product)
         {
-            await _productRepository.Add(product);
+            await _repository.CreateProductAsync(product);
         }
 
-        public async Task UpdateProduct(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
+            await _repository.UpdateProductAsync(product);
         }
 
-        public async Task DeleteProduct(int id)
+        public async Task DeleteProductAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteProductAsync(id);
         }
 
-        public async Task<PagedResult<Product>> GetProductsPaged(int pageNumber, int pageSize)
+        public async Task<PaginationResult<Product>> GetProductsAsync(int page, int pageSize)
         {
-            var totalItems = await _context.Products.CountAsync();
-            var products = await _context.Products
-                .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
-                .OrderBy(p => p.Id)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-            return new PagedResult<Product>(products, totalItems, pageNumber, pageSize);
-        }
-        public async Task<List<ProductType>> GetProductTypes()
-        {
-            return await _context.ProductTypes.ToListAsync();
-        }
+            var products = await _repository.GetProductsAsync(page, pageSize);
+            var totalCount = await _repository.GetProductsCountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-        public async Task<List<ProductSubtype>> GetProductSubtypes()
-        {
-            return await _context.ProductSubtypes.ToListAsync();
+            return new PaginationResult<Product>(products, totalPages, page, pageSize);
         }
     }
+
 }
+    
