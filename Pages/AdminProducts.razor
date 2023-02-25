@@ -1,4 +1,4 @@
-﻿@page "/products"
+﻿@page "/adminproducts"
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
 @using Microsoft.AspNetCore.WebUtilities
@@ -9,12 +9,7 @@
 
 <h1>Products</h1>
 
-@if (Model.Items.Count == 0)
-{
-    <p>No products found.</p>
-}
-else
-{
+
     <table class="table">
         <thead>
             <tr>
@@ -23,6 +18,7 @@ else
                 <th>Description</th>
                 <th>Type</th>
                 <th>Subtype</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,11 +30,16 @@ else
                     <td>@product.Description</td>
                     <td>@product.ProductSubtype.ProductType.Name</td>
                     <td>@product.ProductSubtype.Name</td>
+                    <td>
+                    <button class="btn btn-info">Details</button>
+                    <button class="btn btn-warning">Edit</button>
+                    <button class="btn btn-danger">Delete</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
-}
+
 
 
     <nav>
@@ -64,13 +65,12 @@ else
             }
         </ul>
     </nav>
-}
 
 @code {
     [Parameter]
     public int Page { get; set; } = 1;
 
-    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>();
+    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,7 +79,7 @@ else
 
     private async Task LoadData()
     {
-        Model = await ProductService.GetProductsAsync(Page, 10);
+        Model = await ProductService.GetProductsAsync(Page);
     }
 
     private string GetPageUrl(int pageIndex)

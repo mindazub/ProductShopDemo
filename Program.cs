@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductShopDemo.Areas.Identity;
 using ProductShopDemo.Data;
 using ProductShopDemo.Models;
+using ProductShopDemo.Repositories;
 using ProductShopDemo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //
 
 var app = builder.Build();
