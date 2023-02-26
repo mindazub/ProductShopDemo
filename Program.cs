@@ -40,7 +40,7 @@ using (var scope = app.Services.CreateScope())
     if (context.Database.IsSqlServer() && !context.Products.Any())
     {
         context.Database.Migrate();
-        SeedData.Initialize(services);
+        SeedData.Initialize(services, adminUser);
     }
 }
 

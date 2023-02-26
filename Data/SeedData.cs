@@ -1,19 +1,21 @@
 ﻿
 
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using ProductShopDemo.Models;
-using System;
-using System.Linq;
 
 namespace ProductShopDemo.Data
 {
     public static class SeedData
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static async Task Initialize(IServiceProvider serviceProvider)
         {
             using (var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
+                
+
+
                 // Check if there are any products in the database
                 if (context.Products.Any())
                 {
@@ -58,7 +60,17 @@ namespace ProductShopDemo.Data
                 context.Products.AddRange(products);
 
                 context.SaveChanges();
+
+                AddMembership();
+
+
+
             }
+        }
+
+        private static void AddMembership()
+        {
+            // add DB insert with Admin and User memberships
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿@page "/adminproducts/create"
+@using ProductShopDemo.DTO;
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
 @inject IProductService ProductService
@@ -8,7 +9,7 @@
 
 <h3>Create Product</h3>
 
-<form method="post" action="/adminproducts/create" onclick="CreateProduct">
+<form>
     <div class="form-group">
         <label asp-for="product.Name">Name:</label>
         <input type="text" class="form-control" id="name" asp-for="product.Name">
@@ -57,11 +58,11 @@
         subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == product.ProductSubtype?.ProductType?.Id).ToList();
     }
 
-    private async Task CreateProduct()
-    {
-        await ProductService.CreateProductAsync(product);
-        NavigationManager.NavigateTo("/adminproducts");
-    }
+    //private async Task CreateProduct()
+    //{
+    //    await ProductService.CreateProductAsync(product);
+    //    NavigationManager.NavigateTo("/adminproducts");
+    //}
 
     private void OnProductTypeChanged(ChangeEventArgs e)
     {
@@ -69,4 +70,17 @@
         subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productTypeId).ToList();
         product.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
     }
+
+
+    private async Task<ProductDTO> OnSubmit()
+    {
+        var productInputDTO = new ProductInputDTO();
+
+        productInputDTO.Name = 
+
+        var res = await ProductService.CreateProductAsync(productInputDTO);
+        return res;
+    }
+
+
 }

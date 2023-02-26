@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProductShopDemo.DTO;
 using ProductShopDemo.Models;
 using ProductShopDemo.Repositories;
+using ProductShopDemo.Mappers;
 
 namespace ProductShopDemo.Services
 {
@@ -28,9 +30,16 @@ namespace ProductShopDemo.Services
             return await _repository.GetProductAsync(id);
         }
 
-        public async Task CreateProductAsync(Product product)
+        public async Task<ProductDTO> CreateProductAsync(ProductInputDTO productInputDTO)
         {
-            await _repository.CreateProductAsync(product);
+            var product = ProductMapper.mapProductInputDTOToProduct(productInputDTO);
+
+            var createdProduct = await _repository.CreateProductAsync(product);
+
+            var responseDTO = ProductMapper.mapProductToProductDTO(createdProduct);
+
+            return responseDTO;
+
         }
 
         public async Task UpdateProductAsync(Product product)

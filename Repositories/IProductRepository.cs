@@ -7,7 +7,7 @@ namespace ProductShopDemo.Repositories
         Task<IEnumerable<Product>> GetProductsAsync(int page, int itemsPerPage);
         Task<int> GetProductsCountAsync();
         Task<Product> GetProductAsync(int id);
-        Task CreateProductAsync(Product product);
+        Task<Product> CreateProductAsync(Product product);
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int id);
 
