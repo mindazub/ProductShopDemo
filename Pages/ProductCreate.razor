@@ -9,18 +9,20 @@
 
 <h3>Create Product</h3>
 
-<form>
+
+
+<EditForm Model="@productModel">
     <div class="form-group">
-        <label asp-for="product.Name">Name:</label>
-        <input type="text" class="form-control" id="name" asp-for="product.Name">
+        <label for="name">Name:</label>
+        <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
     </div>
     <div class="form-group">
-        <label asp-for="product.Description">Description:</label>
-        <input type="text" class="form-control" id="description" asp-for="product.Description">
+        <label for="description">Description:</label>
+        <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
     </div>
     <div class="form-group">
-        <label asp-for="product.Price">Price:</label>
-        <input type="number" class="form-control" id="price" asp-for="product.Price">
+        <label for="price">Price:</label>
+        <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
     </div>
     <div class="form-group">
         <label asp-for="product.ProductType">Product Type:</label>
@@ -42,11 +44,11 @@
         </select>
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
-</form>
+</EditForm>
 </div>
 
 @code {
-    private ProductDTO productDTO = new ProductDTO();
+    private ProductDTO productModel = new ProductDTO();
     private List<ProductType> productTypes = new List<ProductType>();
     private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
     private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
@@ -55,7 +57,7 @@
     {
         productTypes = await ProductService.GetProductTypesAsync();
         allProductSubtypes = await ProductService.GetProductSubtypesAsync();
-        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productDTO.ProductSubtype?.ProductType?.Id).ToList();
+        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
     }
 
     //private async Task CreateProduct()
@@ -68,7 +70,7 @@
     {
         int productTypeId = Convert.ToInt32(e.Value);
         subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productTypeId).ToList();
-        productDTO.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
+        productModel.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
     }
 
 
@@ -76,11 +78,11 @@
     {
         var productInputDTO = new ProductInputDTO();
 
-        productInputDTO.Name = productDTO.Name;
-        productInputDTO.Description = productDTO.Description;
-        productInputDTO.Price = productDTO.Price;
-        productInputDTO.ProductSubtype = productDTO.ProductSubtype;
-        productInputDTO.ProductSubtypeId = productDTO.ProductSubtypeId;
+        productInputDTO.Name = productModel.Name;
+        productInputDTO.Description = productModel.Description;
+        productInputDTO.Price = productModel.Price;
+        productInputDTO.ProductSubtype = productModel.ProductSubtype;
+        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
         
 
         var res = await ProductService.CreateProductAsync(productInputDTO);
