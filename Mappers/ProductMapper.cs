@@ -12,6 +12,7 @@ namespace ProductShopDemo.Mappers
             product.Description = productInputDTO.Description;
             product.Price = productInputDTO.Price;
             product.ProductSubtype = productInputDTO.ProductSubtype;
+            product.ProductSubtypeId = productInputDTO.ProductSubtypeId;
             return product;
         }
 
@@ -23,6 +24,7 @@ namespace ProductShopDemo.Mappers
             productDTO.Description = product.Description;
             productDTO.Price = product.Price;
             productDTO.ProductSubtype = product.ProductSubtype;
+            productDTO.ProductSubtypeId = product.ProductSubtypeId;
             return productDTO;
         }
     }
