@@ -11,7 +11,7 @@
 
 
 
-<EditForm Model="@productModel">
+    <EditForm Model="@productModel" OnSubmit="OnSubmit">
     <div class="form-group">
         <label for="name">Name:</label>
         <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
