@@ -17,7 +17,8 @@ namespace ProductShopDemo.Repositories
         {
             return await _context.Products
                 .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
+                .ThenInclude(s => s.ProductType)
+                .OrderByDescending(p => p.Id)
                 .Skip((page - 1) * itemsPerPage)
                 .Take(itemsPerPage)
                 .ToListAsync();
@@ -32,7 +33,7 @@ namespace ProductShopDemo.Repositories
         {
             return await _context.Products
                 .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
+                .ThenInclude(s => s.ProductType)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
