@@ -45,10 +45,11 @@ namespace ProductShopDemo.Repositories
             return product;
         }
 
-        public async Task UpdateProductAsync(Product product)
+        public async Task<Product> UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
+            return product;
         }
 
         public async Task DeleteProductAsync(int id)

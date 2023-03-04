@@ -1,48 +1,48 @@
 ﻿@page "/adminproducts/edit/{id:int}"
-@using ProductShopDemo.Models;
-@using ProductShopDemo.Services;
+@using ProductShopDemo.DTO;
+@using ProductShopDemo.Models
+@using ProductShopDemo.Services
 @inject IProductService ProductService
 @inject NavigationManager NavigationManager
 
 <h1>Edit Product</h1>
 
-@if (product == null)
+@if (productModel == null)
 {
         <p>Loading...</p>
 }
 else
-{@*
-        <form>
-            <div class="form-group">
-                <label for="nameInput">Name</label>
-                <input type="text" class="form-control" id="nameInput" @bind-value="product.Name" />
-            </div>
-            <div class="form-group">
-                <label for="descriptionInput">Description</label>
-                <input type="text" class="form-control" id="descriptionInput" @bind-value="product.Description" />
-            </div>
-            <div class="form-group">
-                <label for="priceInput">Price</label>
-                <input type="text" class="form-control" id="priceInput" @bind-value="product.Price" />
-            </div>
-            <button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save</button>
-        </form>*@
+{
+    <EditForm Model="@productModel">
+
+        <h2>Product ID = @productModel.Id</h2>
+
+    </EditForm>
 }
 
 @code {
-    Product product = new Product();
+    ProductDTO productModel = new ProductDTO();
 
     [Parameter]
     public int Id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        product = await ProductService.GetProductAsync(Id);
+        productModel = await ProductService.GetProductAsync(Id);
     }
 
-    private async Task HandleSubmit()
+    private async Task<ProductDTO> OnSubmit()
     {
-        await ProductService.UpdateProductAsync(product);
-        NavigationManager.NavigateTo("/adminproducts");
+        var productInputDTO = new ProductInputDTO();
+
+        productInputDTO.Name = productModel.Name;
+        productInputDTO.Description = productModel.Description;
+        productInputDTO.Price = productModel.Price;
+        productInputDTO.ProductSubtype = productModel.ProductSubtype;
+        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
+
+
+        var res = await ProductService.UpdateProductAsync(productInputDTO);
+        return res;
     }
 }

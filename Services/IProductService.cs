@@ -7,11 +7,11 @@ namespace ProductShopDemo.Services
     {
         Task<ProductDTO> CreateProductAsync(ProductInputDTO productInputDTO);
         Task DeleteProductAsync(int id);
-        Task<Product> GetProductAsync(int id);
+        Task<ProductDTO> GetProductAsync(int id);
         Task<PaginationResult<Product>> GetProductsAsync(int page);
         Task<PaginationResult<Product>> GetProductsAsync(int page, int pageSize);
         Task<List<ProductSubtype>> GetProductSubtypesAsync();
         Task<List<ProductType>> GetProductTypesAsync();
-        Task UpdateProductAsync(Product product);
+        Task<ProductDTO> UpdateProductAsync(ProductInputDTO productInputDTO);
     }
 }

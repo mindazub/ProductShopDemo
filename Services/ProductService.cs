@@ -3,6 +3,8 @@ using ProductShopDemo.DTO;
 using ProductShopDemo.Models;
 using ProductShopDemo.Repositories;
 using ProductShopDemo.Mappers;
+using ProductShopDemo.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ProductShopDemo.Services
 {
@@ -25,9 +27,13 @@ namespace ProductShopDemo.Services
             return new PaginationResult<Product>(products, totalPages, page, itemsPerPage);
         }
 
-        public async Task<Product> GetProductAsync(int id)
+        public async Task<ProductDTO> GetProductAsync(int id)
         {
-            return await _repository.GetProductAsync(id);
+            var productFromDB = await _repository.GetProductAsync(id);
+
+            var responseDTO = ProductMapper.mapProductToProductDTO(productFromDB); 
+
+            return responseDTO;
         }
 
         public async Task<ProductDTO> CreateProductAsync(ProductInputDTO productInputDTO)
@@ -42,9 +48,15 @@ namespace ProductShopDemo.Services
 
         }
 
-        public async Task UpdateProductAsync(Product product)
+        public async Task<ProductDTO> UpdateProductAsync(ProductInputDTO productInputDTO)
         {
-            await _repository.UpdateProductAsync(product);
+            var product = ProductMapper.mapProductInputDTOToProduct(productInputDTO);
+
+            var updatedProduct = await _repository.UpdateProductAsync(product);
+
+            var responseDTO = ProductMapper.mapProductToProductDTO(updatedProduct);
+
+            return responseDTO;
         }
 
         public async Task DeleteProductAsync(int id)
