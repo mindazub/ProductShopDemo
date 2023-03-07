@@ -1,0 +1,98 @@
+﻿@page "/adminproducts/{id:int}"
+@using ProductShopDemo.DTO;
+@using ProductShopDemo.Models
+@using ProductShopDemo.Services
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+
+
+<div class="col-md-6">
+
+    <h3>Product @productModel.Name</h3>
+
+    <p>@productModel.Name</p>
+
+    <p>@productModel.Description</p>
+
+    <p>@productModel.Price</p>
+
+        
+</div>
+
+
+@code {
+    private ProductDTO productModel = new ProductDTO();
+    private List<ProductType> productTypes = new List<ProductType>();
+    private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
+    private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
+    private bool ShowError = false;
+    private string ErrorMessage = "";
+
+
+    [Parameter]
+    public int Id { get; set; }
+
+
+
+    protected void onError(string message)
+    {
+        ShowError = true;
+        ErrorMessage = $"Error happened: {message}";
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+            productTypes = await ProductService.GetProductTypesAsync();
+            allProductSubtypes = await ProductService.GetProductSubtypesAsync();
+            subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
+
+            productModel = await ProductService.GetProductAsync(Id);
+        } 
+        catch(Exception ex)
+        {
+            if(ex.Message.Contains("Can't find product"))
+            {
+                onError(ex.Message);
+            }
+            else
+            {
+                onError($"Unhandled exception. {ex.Message}");
+            }
+        }    
+
+    }
+
+    private void OnProductTypeChanged(ChangeEventArgs e)
+    {
+        int productTypeId = Convert.ToInt32(e.Value);
+        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productTypeId).ToList();
+        productModel.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
+    }
+
+    private async Task<ProductDTO> OnSubmit()
+    {
+        if(Id == null)
+        {
+            NavigationManager.NavigateTo("/adminproducts");
+            return null;
+        }
+        else
+        {
+            var productInputDTO = new ProductInputDTO();
+
+            productInputDTO.Name = productModel.Name;
+            productInputDTO.Description = productModel.Description;
+            productInputDTO.Price = productModel.Price;
+            productInputDTO.ProductSubtype = productModel.ProductSubtype;
+            productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
+
+
+            var res = await ProductService.UpdateProductAsync(productInputDTO);
+            return res;
+        }
+    }
+}
