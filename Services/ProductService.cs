@@ -30,6 +30,10 @@ namespace ProductShopDemo.Services
         public async Task<ProductDTO> GetProductAsync(int id)
         {
             var productFromDB = await _repository.GetProductAsync(id);
+            if(productFromDB == null)
+            {
+                throw new Exception($"Can't find product Id:{id}");
+            }
 
             var responseDTO = ProductMapper.mapProductToProductDTO(productFromDB); 
 

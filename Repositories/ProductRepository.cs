@@ -31,10 +31,8 @@ namespace ProductShopDemo.Repositories
 
         public async Task<Product> GetProductAsync(int id)
         {
-            return await _context.Products
-                .Include(p => p.ProductSubtype)
-                .ThenInclude(s => s.ProductType)
-                .FirstOrDefaultAsync(p => p.Id == id);
+
+            return await _context.Products.Where(p => p.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<Product> CreateProductAsync(Product product)

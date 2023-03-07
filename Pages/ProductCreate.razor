@@ -59,11 +59,7 @@
         subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
     }
 
-    //private async Task CreateProduct()
-    //{
-    //    await ProductService.CreateProductAsync(product);
-    //    NavigationManager.NavigateTo("/adminproducts");
-    //}
+
 
     private void OnProductTypeChanged(ChangeEventArgs e)
     {
@@ -81,8 +77,7 @@
         productInputDTO.Description = productModel.Description;
         productInputDTO.Price = productModel.Price;
         productInputDTO.ProductSubtype = productModel.ProductSubtype;
-        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
-        
+        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;        
 
         var res = await ProductService.CreateProductAsync(productInputDTO);
         return res;
