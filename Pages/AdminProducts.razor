@@ -107,7 +107,7 @@
 
     private async Task DeleteTheProduct(int productId)
     {
-        var Uri = "/adminproducts";
+        //var Uri = "/adminproducts";
         await ProductService.DeleteProductAsync(productId);
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
 
