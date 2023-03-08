@@ -31,9 +31,11 @@
                     <td>@product.ProductSubtype.ProductType.Name</td>
                     <td>@product.ProductSubtype.Name</td>
                     <td>
-                    <button class="btn btn-info">Details</button>
-                    <button class="btn btn-warning">Edit</button>
-                    <button class="btn btn-danger">Delete</button>
+                    <button class="btn btn-info" @onclick="() => NavigateToDetails(product.Id)">
+                        Details
+                    </button>
+                    <button class="btn btn-warning" @onclick="() => NavigateToEdit(product.Id)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteTheProduct(product.Id)">Delete</button>
                     </td>
                 </tr>
             }
@@ -88,5 +90,26 @@
         var query = QueryHelpers.ParseQuery(uri.Query);
         query["page"] = pageIndex.ToString();
         return uri.GetLeftPart(UriPartial.Path) + QueryString.Create(query);
+    }
+
+    private async Task NavigateToDetails(int productId)
+    {
+        var url = $"/adminproducts/{productId}";
+        NavigationManager.NavigateTo(url);
+    }
+
+    private async Task NavigateToEdit(int productId)
+    {
+        var url = $"/adminproducts/edit/{productId}";
+        NavigationManager.NavigateTo(url);
+
+    }
+
+    private async Task DeleteTheProduct(int productId)
+    {
+        var Uri = "/adminproducts";
+        await ProductService.DeleteProductAsync(productId);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+
     }
 }

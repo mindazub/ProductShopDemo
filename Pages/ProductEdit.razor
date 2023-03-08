@@ -120,6 +120,7 @@
 
 
             var res = await ProductService.UpdateProductAsync(productInputDTO);
+            NavigationManager.NavigateTo("/adminproducts");
             return res;
         }
     }
