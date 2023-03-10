@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 using ProductShopDemo.Areas.Identity;
 using ProductShopDemo.Data;
 using ProductShopDemo.Models;
@@ -27,6 +28,15 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //
+//builder.Services.AddSingleton<IJSRuntime, JSInProcessRuntime>();
+//
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
+
+
 
 var app = builder.Build();
 
@@ -59,6 +69,14 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// session state
+
+app.UseSession();
+
+
+//
+
 
 app.UseHttpsRedirection();
 
