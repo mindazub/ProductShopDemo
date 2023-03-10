@@ -13,10 +13,10 @@
     {
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100">
-                <NavLink href="#"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></NavLink>
+                <a href="#" @onclick="() => NavigateToDetails(product.Id)"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></a>
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a href="#link_product_details">@product.Name</a>
+                        <a href="#" @onclick="() => NavigateToDetails(product.Id)">@product.Name</a>
                     </h4>
                     <p class="card-text">@product.Description</p>
                 </div>
@@ -61,10 +61,10 @@
     {
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100">
-                <a href="#link_product_details"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></a>
+                <a href="#"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></a>
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a href="#link_product_details">@product.Name</a>
+                        <a href="#" @onclick="() => NavigateToDetails(product.Id)">@product.Name</a>
                     </h4>
                     <p class="card-text">@product.Description</p>
                 </div>
@@ -101,5 +101,11 @@
     public void Dispose()
     {
         // Clean up resources here if needed
+    }
+
+    private async Task NavigateToDetails(int productId)
+    {
+        var url = $"/{productId}";
+        NavigationManager.NavigateTo(url);
     }
 }
