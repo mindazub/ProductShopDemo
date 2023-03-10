@@ -6,10 +6,15 @@
 @inject IProductService ProductService
 
 
-<h1>Products</h1>
+<div class="container">
+
+<h1>Product List</h1>
 <br />
-<a href="/adminproducts/create" class="btn btn-primary">Create</a>
-<br/>
+<a href="/adminproducts/create" class="btn btn-info mb-4">
+    <span class="oi oi-plus" aria-hidden="true"></span>
+    Create
+</a>
+<br />
     <table class="table">
         <thead>
             <tr>
@@ -67,6 +72,8 @@
             }
         </ul>
     </nav>
+
+</div>
 
 @code {
     [Parameter]

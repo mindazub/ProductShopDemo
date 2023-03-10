@@ -6,9 +6,15 @@
 @inject NavigationManager NavigationManager
 
 
-<div class="col-md-6">
+<div class="container">
 
-    <h3>Edit Product</h3>
+    <h1>Edit "@productModel.Name" Product</h1>
+    <br />
+    <a href="/adminproducts" class="btn btn-info mb-4">
+        <span class="oi oi-arrow-left" aria-hidden="true"></span>
+        Back
+    </a>
+    <br />
 
 
     <EditForm Model="@productModel" OnSubmit="OnSubmit">
@@ -53,7 +59,7 @@
     private List<ProductType> productTypes = new List<ProductType>();
     private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
     private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
-    private bool ShowError = false;
+    //private bool ShowError = false;
     private string ErrorMessage = "";
 
 
@@ -64,7 +70,7 @@
 
     protected void onError(string message)
     {
-        ShowError = true;
+        //ShowError = true;
         ErrorMessage = $"Error happened: {message}";
     }
 
