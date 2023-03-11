@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.WebUtilities;
+@using ProductShopDemo.DTO
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
 @using Microsoft.JSInterop;
@@ -9,6 +10,8 @@
 @inject IProductService ProductService
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @implements IDisposable
+
+
 
 <div class="row">
     <h1>Products List</h1>
@@ -83,7 +86,12 @@
 
     private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
-    private List<Product> RecentlyViewed { get; set; } = new List<Product>();
+    //private List<Product> RecentlyViewed { get; set; } = new List<Product>();
+
+    private Queue<Product> RecentlyViewed { get; set; } = new Queue<Product>();
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,19 +106,33 @@
 
     private async Task LoadRecentlyViewed()
     {
-        RecentlyViewed = await localStorage.GetItemAsync<List<Product>>("recentlyViewed") ?? new List<Product>();
-        StateHasChanged();
+        var sessionData = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "recentlyViewed");
+        if (!string.IsNullOrEmpty(sessionData))
+        {
+            var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
+            foreach (var product in products)
+            {
+                RecentlyViewed.Enqueue(product);
+            }
+        }
     }
+
 
     private async Task NavigateToDetails(int productId)
     {
         var product = Model.Items.FirstOrDefault(p => p.Id == productId);
         if (product != null)
         {
-            // Add the product to the beginning of the recently viewed list
-            RecentlyViewed.Insert(0, product);
-            // Store the recently viewed list in local storage
-            await localStorage.SetItemAsync("recentlyViewed", RecentlyViewed.Take(3).ToList());
+            // Add the product to the beginning of the recently viewed queue
+            RecentlyViewed.Enqueue(product);
+            // Remove the oldest item from the queue if its size is greater than 3
+            if (RecentlyViewed.Count > 3)
+            {
+                RecentlyViewed.Dequeue();
+            }
+            // Store the recently viewed queue in session storage
+            var sessionData = JsonSerializer.Serialize(RecentlyViewed.ToList());
+            await JSRuntime.InvokeAsync<object>("sessionStorage.setItem", "recentlyViewed", sessionData);
             // Navigate to the product details page
             var url = $"/{productId}";
             NavigationManager.NavigateTo(url);
