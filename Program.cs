@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -23,6 +24,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+//
+builder.Services.AddBlazoredLocalStorage();
+//
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -30,6 +34,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //
 //builder.Services.AddSingleton<IJSRuntime, JSInProcessRuntime>();
 //
+
 
 builder.Services.AddSession(options =>
 {

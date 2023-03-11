@@ -6,8 +6,8 @@
 @using System.Text.Json;
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
 @inject IProductService ProductService
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @implements IDisposable
 
 <div class="row">
@@ -88,7 +88,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
-        LoadRecentlyViewed();
+        //await LoadRecentlyViewed();
     }
 
     private async Task LoadData()
@@ -98,39 +98,37 @@
 
     private async Task LoadRecentlyViewed()
     {
-        var sessionData = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "recentlyViewed");
-        if (!string.IsNullOrEmpty(sessionData))
-        {
-            var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
-            RecentlyViewed = products;
-        }
+        RecentlyViewed = await localStorage.GetItemAsync<List<Product>>("recentlyViewed") ?? new List<Product>();
+        StateHasChanged();
     }
 
     private async Task NavigateToDetails(int productId)
     {
-        //
         var product = Model.Items.FirstOrDefault(p => p.Id == productId);
         if (product != null)
         {
             // Add the product to the beginning of the recently viewed list
             RecentlyViewed.Insert(0, product);
-            // Store the recently viewed list in session storage
-            var sessionData = JsonSerializer.Serialize(RecentlyViewed);
-            await JSRuntime.InvokeAsync<object>("sessionStorage.setItem", "recentlyViewed", sessionData);
+            // Store the recently viewed list in local storage
+            await localStorage.SetItemAsync("recentlyViewed", RecentlyViewed.Take(3).ToList());
             // Navigate to the product details page
-            var url1 = $"/{productId}";
-            NavigationManager.NavigateTo(url1);
+            var url = $"/{productId}";
+            NavigationManager.NavigateTo(url);
         }
-        //
-        //var url = $"/{productId}";
-        //NavigationManager.NavigateTo(url);
-
     }
 
     public void Dispose()
     {
-        
-        
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("scrollTo", 0, 0);
+            await LoadRecentlyViewed();
+        }
     }
 
 }

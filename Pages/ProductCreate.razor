@@ -87,8 +87,8 @@
         productInputDTO.Price = productModel.Price;
         productInputDTO.ProductSubtype = productModel.ProductSubtype;
         productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;        
-
         var res = await ProductService.CreateProductAsync(productInputDTO);
+        NavigationManager.NavigateTo("/");
         return res;
     }
 
