@@ -1,17 +1,14 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.WebUtilities;
-@using ProductShopDemo.DTO
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
 @using Microsoft.JSInterop;
 @using System.Text.Json;
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+
 @inject IProductService ProductService
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @implements IDisposable
-
-
 
 <div class="row">
     <h1>Products List</h1>
@@ -86,17 +83,12 @@
 
     private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
-    //private List<Product> RecentlyViewed { get; set; } = new List<Product>();
-
-    private Queue<Product> RecentlyViewed { get; set; } = new Queue<Product>();
-
-
-
+    private List<Product> RecentlyViewed { get; set; } = new List<Product>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
-        //await LoadRecentlyViewed();
+        LoadRecentlyViewed();
     }
 
     private async Task LoadData()
@@ -110,47 +102,35 @@
         if (!string.IsNullOrEmpty(sessionData))
         {
             var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
-            foreach (var product in products)
-            {
-                RecentlyViewed.Enqueue(product);
-            }
+            RecentlyViewed = products;
         }
     }
 
-
     private async Task NavigateToDetails(int productId)
     {
+        //
         var product = Model.Items.FirstOrDefault(p => p.Id == productId);
         if (product != null)
         {
-            // Add the product to the beginning of the recently viewed queue
-            RecentlyViewed.Enqueue(product);
-            // Remove the oldest item from the queue if its size is greater than 3
-            if (RecentlyViewed.Count > 3)
-            {
-                RecentlyViewed.Dequeue();
-            }
-            // Store the recently viewed queue in session storage
-            var sessionData = JsonSerializer.Serialize(RecentlyViewed.ToList());
+            // Add the product to the beginning of the recently viewed list
+            RecentlyViewed.Insert(0, product);
+            // Store the recently viewed list in session storage
+            var sessionData = JsonSerializer.Serialize(RecentlyViewed);
             await JSRuntime.InvokeAsync<object>("sessionStorage.setItem", "recentlyViewed", sessionData);
             // Navigate to the product details page
-            var url = $"/{productId}";
-            NavigationManager.NavigateTo(url);
+            var url1 = $"/{productId}";
+            NavigationManager.NavigateTo(url1);
         }
+        //
+        //var url = $"/{productId}";
+        //NavigationManager.NavigateTo(url);
+
     }
 
     public void Dispose()
     {
 
-    }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("scrollTo", 0, 0);
-            await LoadRecentlyViewed();
-        }
     }
 
 }
