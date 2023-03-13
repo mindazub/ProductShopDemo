@@ -2,10 +2,7 @@
 @using Microsoft.AspNetCore.WebUtilities;
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
-@using Microsoft.JSInterop;
-@using System.Text.Json;
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 
 @inject IProductService ProductService
 @implements IDisposable
@@ -60,7 +57,7 @@
 <div class="row">
     <h1>Recently Viewed</h1>
     <br />
-    @foreach (var product in RecentlyViewed.Take(3))
+    @foreach (var product in Model.Items.Take(3))
     {
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100">
@@ -83,12 +80,12 @@
 
     private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
-    private List<Product> RecentlyViewed { get; set; } = new List<Product>();
+
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
-        LoadRecentlyViewed();
     }
 
     private async Task LoadData()
@@ -96,41 +93,24 @@
         Model = await ProductService.GetProductsAsync(Page);
     }
 
-    private async Task LoadRecentlyViewed()
+    private string GetPageUrl(int pageIndex)
     {
-        var sessionData = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "recentlyViewed");
-        if (!string.IsNullOrEmpty(sessionData))
-        {
-            var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
-            RecentlyViewed = products;
-        }
-    }
-
-    private async Task NavigateToDetails(int productId)
-    {
-        //
-        var product = Model.Items.FirstOrDefault(p => p.Id == productId);
-        if (product != null)
-        {
-            // Add the product to the beginning of the recently viewed list
-            RecentlyViewed.Insert(0, product);
-            // Store the recently viewed list in session storage
-            var sessionData = JsonSerializer.Serialize(RecentlyViewed);
-            await JSRuntime.InvokeAsync<object>("sessionStorage.setItem", "recentlyViewed", sessionData);
-            // Navigate to the product details page
-            var url1 = $"/{productId}";
-            NavigationManager.NavigateTo(url1);
-        }
-        //
-        //var url = $"/{productId}";
-        //NavigationManager.NavigateTo(url);
-
+        var uri = new Uri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        query["page"] = pageIndex.ToString();
+        return uri.GetLeftPart(UriPartial.Path) + QueryString.Create(query);
     }
 
     public void Dispose()
     {
-
-
+        // Clean up resources here if needed
     }
+
+    private async Task NavigateToDetails(int productId)
+    {
+        var url = $"/{productId}";
+        NavigationManager.NavigateTo(url);
+    }
+
 
 }

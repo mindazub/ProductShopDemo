@@ -16,43 +16,55 @@
     </a>
     <br />
 
+    <div class="row">
+    <div class="col-6">
 
-    <EditForm Model="@productModel" OnSubmit="OnSubmit">
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
-    </div>
-    <div class="form-group">
-        <label for="description">Description:</label>
-        <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
-    </div>
-    <div class="form-group">
-        <label for="price">Price:</label>
-        <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
-    </div>
-    <div class="form-group">
-        <label asp-for="product.ProductType">Product Type:</label>
-        <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
-            <option value="#">--- Select Product Type --- </option>
-            @foreach (var productType in productTypes)
-            {
-                <option value="@productType.Id">@productType.Name</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label asp-for="product.ProductSubtype">Product Subtype:</label>
-        <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
-            @foreach (var productSubtype in subtypesForSelectedType)
-            {
-                <option value="@productSubtype.Id">@productSubtype.Name</option>
-            }
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</EditForm>
+        <EditForm Model="@productModel" OnSubmit="OnSubmit">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
+            </div>
+            <div class="form-group">
+                <label asp-for="product.ProductType">Product Type:</label>
+                <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
+                    <option value="#">--- Select Product Type --- </option>
+                    @foreach (var productType in productTypes)
+                    {
+                        <option value="@productType.Id">@productType.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="product.ProductSubtype">Product Subtype:</label>
+                <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
+                    @foreach (var productSubtype in subtypesForSelectedType)
+                    {
+                        <option value="@productSubtype.Id">@productSubtype.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
 
+    </div>
+
+        <div class="col-md-6">
+            <img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@productModel.Name">
+        </div>
+
+    </div>
 </div>
+    
+
+
 
 
 @code {
