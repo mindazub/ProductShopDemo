@@ -35,6 +35,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //
 //builder.Services.AddSingleton<IJSRuntime, JSInProcessRuntime>();
 //
+builder.Services.AddBlazoredLocalStorage();
 
 
 builder.Services.AddSession(options =>
