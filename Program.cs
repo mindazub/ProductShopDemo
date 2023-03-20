@@ -12,7 +12,6 @@ using ProductShopDemo.Models;
 using ProductShopDemo.Repositories;
 using ProductShopDemo.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -32,9 +31,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-//
+
 //builder.Services.AddSingleton<IJSRuntime, JSInProcessRuntime>();
-//
+
 builder.Services.AddBlazoredLocalStorage();
 
 
