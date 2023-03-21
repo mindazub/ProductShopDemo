@@ -1,13 +1,11 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.WebUtilities;
-
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
 @using Microsoft.JSInterop;
 @using System.Text.Json;
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@inject Blazored.LocalStorage.ILocalStorageService localStore
 
 @inject IProductService ProductService
 @implements IDisposable
@@ -28,8 +26,6 @@
             </div>
         </div>
     }
-
-    
 
     <div class="col-12">
         <nav aria-label="Products pagination">
@@ -55,7 +51,6 @@
                 {
                     <li class="page-item"><a class="page-link" href="?page=@(Model.PageIndex + 1)">Next</a></li>
                 }
-
             </ul>
         </nav>
     </div>
@@ -64,7 +59,8 @@
 
 <div class="row">
     <h1>Recently Viewed</h1>
-    @foreach (var product in RecentlyViewed.Items)
+    <br />
+    @foreach (var product in RecentlyViewed.Take(3))
     {
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100">
@@ -78,6 +74,7 @@
             </div>
         </div>
     }
+
 </div>
 
 @code {
@@ -85,27 +82,13 @@
     public int Page { get; set; } = 1;
 
     private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
-    private PaginationResult<Product> RecentlyViewed { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
-    //private List<Product> RecentlyViewed { get; set; } = new List<Product>();
-
-
-    // ??? INIT and GET RecentlyViewed from localstorage || GET OnAfterRenderAsync ????
-
-
+    private List<Product> RecentlyViewed { get; set; } = new List<Product>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
-        //await LoadRecentlyViewed();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await LoadRecentlyViewed();
-        }
+        LoadRecentlyViewed();
     }
 
     private async Task LoadData()
@@ -113,41 +96,29 @@
         Model = await ProductService.GetProductsAsync(Page);
     }
 
-
     private async Task LoadRecentlyViewed()
     {
-        //var storageData = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "recentlyViewed");
-        //if (!string.IsNullOrEmpty(storageData))
-        //{
-        //    var products = JsonSerializer.Deserialize<PaginationResult<Product>>(storageData);
-        //    RecentlyViewed = products;
-        //}
+        var sessionData = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "recentlyViewed");
+        if (!string.IsNullOrEmpty(sessionData))
+        {
+            var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
+            RecentlyViewed = products;
+        }
     }
 
     private async Task NavigateToDetails(int productId)
     {
+        //
         var product = Model.Items.FirstOrDefault(p => p.Id == productId);
         if (product != null)
         {
-            //// Add the product to the beginning of the recently viewed list
-            //RecentlyViewed.Items.Add(new Product()
-            //    {
-            //        Name = "New Product",
-            //        Price = 9.99M
-            //    };
-            //// Store the recently viewed list in Local storage
-            //var storageData = JsonSerializer.Serialize(RecentlyViewed);
-            //await JSRuntime.InvokeAsync<object>("localStorage.setItem", "recentlyViewed", storageData);
+
             // Navigate to the product details page
-
-            var prodName = product.Name;
-            await localStore.SetItemAsync("product", JSON.stringify(product));
-            //Console.WriteLine("Product ID: " + product.Id);
-
-
-            var url = $"/{productId}";
-            NavigationManager.NavigateTo(url);
+            var url1 = $"/{productId}";
+            NavigationManager.NavigateTo(url1);
         }
+
+
     }
 
     public void Dispose()

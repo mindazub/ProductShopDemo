@@ -2,8 +2,11 @@
 @using ProductShopDemo.DTO;
 @using ProductShopDemo.Models
 @using ProductShopDemo.Services
+@using System.Text.Json;
+
 @inject IProductService ProductService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 
 <div class="container">
 
@@ -36,25 +39,19 @@
     private List<ProductType> productTypes = new List<ProductType>();
     private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
     private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
-    //private bool ShowError = false;
     private string ErrorMessage = "";
-
+    private const string localStorageKey = "recentlyViewed";
 
     [Parameter]
     public int Id { get; set; }
 
-
-
     protected void onError(string message)
     {
-        //ShowError = true;
         ErrorMessage = $"Error happened: {message}";
     }
 
-
     protected override async Task OnInitializedAsync()
     {
-
         try
         {
             productTypes = await ProductService.GetProductTypesAsync();
@@ -62,6 +59,22 @@
             subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
 
             productModel = await ProductService.GetProductAsync(Id);
+
+            // Add the product to the recently viewed list in local storage
+            var recentlyViewedJson = await jsRuntime.InvokeAsync<string>("localStorage.getItem", localStorageKey);
+            var recentlyViewed = string.IsNullOrEmpty(recentlyViewedJson) ? new List<int>() : JsonSerializer.Deserialize<List<int>>(recentlyViewedJson);
+
+            if (!recentlyViewed.Contains(Id))
+            {
+                recentlyViewed.Add(Id);
+                if (recentlyViewed.Count > 10)
+                {
+                    recentlyViewed.RemoveAt(0);
+                }
+
+                var recentlyViewedJsonNew = JsonSerializer.Serialize(recentlyViewed);
+                await jsRuntime.InvokeVoidAsync("localStorage.setItem", localStorageKey, recentlyViewedJsonNew);
+            }
         }
         catch (Exception ex)
         {
