@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.WebUtilities;
 @using ProductShopDemo.Models
+@using ProductShopDemo.DTO
 @using ProductShopDemo.Services
 @using Microsoft.JSInterop;
 @using System.Text.Json;
@@ -78,17 +79,24 @@
 </div>
 
 @code {
+
+
+
     [Parameter]
     public int Page { get; set; } = 1;
 
-    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
-    private List<Product> RecentlyViewed { get; set; } = new List<Product>();
+
+    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
+    //private PaginationResult<Product> RecentlyViewed { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
+
+    private List<ProductDTO> RecentlyViewed { get; set; } = new List<ProductDTO>();
+
+    private bool firstRender = true;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
-        LoadRecentlyViewed();
     }
 
     private async Task LoadData()
@@ -96,12 +104,32 @@
         Model = await ProductService.GetProductsAsync(Page);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadRecentlyViewed();
+            this.firstRender = false;
+            StateHasChanged();
+        }
+    }
+
     private async Task LoadRecentlyViewed()
     {
-        var sessionData = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "recentlyViewed");
-        if (!string.IsNullOrEmpty(sessionData))
+        var localStorageData = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "recentlyViewed");
+        if (!string.IsNullOrEmpty(localStorageData))
         {
-            var products = JsonSerializer.Deserialize<List<Product>>(sessionData);
+            var productIds = JsonSerializer.Deserialize<List<int>>(localStorageData);
+            var products = new List<ProductDTO>();
+            foreach (var id in productIds)
+            {
+                var productDTO = await ProductService.GetProductAsync(id);
+
+                if (productDTO != null)
+                {
+                    products.Add(productDTO);
+                }
+            }
             RecentlyViewed = products;
         }
     }
