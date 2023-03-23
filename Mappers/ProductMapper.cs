@@ -5,7 +5,7 @@ namespace ProductShopDemo.Mappers
 {
     public class ProductMapper
     {
-        internal static Product mapProductInputDTOToProduct(ProductInputDTO productInputDTO)
+        public static Product mapProductInputDTOToProduct(ProductInputDTO productInputDTO)
         {
             var product = new Product();
             product.Name = productInputDTO.Name;
@@ -16,7 +16,7 @@ namespace ProductShopDemo.Mappers
             return product;
         }
 
-        internal static ProductDTO mapProductToProductDTO(Product product)
+        public static ProductDTO mapProductToProductDTO(Product product)
         {
             var productDTO = new ProductDTO();
             productDTO.Id = product.Id;

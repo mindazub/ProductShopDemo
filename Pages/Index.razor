@@ -1,9 +1,159 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.WebUtilities;
+@using ProductShopDemo.Models
+@using ProductShopDemo.DTO
+@using ProductShopDemo.Services
+@using Microsoft.JSInterop;
+@using System.Text.Json;
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Index</PageTitle>
+@inject IProductService ProductService
+@implements IDisposable
 
-<h1>Hello, world!</h1>
+<div class="row">
+    <h1>Products List</h1>
 
-Welcome to your new app.
+    @foreach (var product in Model.Items.Take(6))
+    {
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <a href="#" @onclick="() => NavigateToDetails(product.Id)"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></a>
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <a href="#" @onclick="() => NavigateToDetails(product.Id)">@product.Name</a>
+                    </h4>
+                    <p class="card-text">@product.Description</p>
+                </div>
+            </div>
+        </div>
+    }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <div class="col-12">
+        <nav aria-label="Products pagination">
+            <ul class="pagination">
+                @if (Model.HasPreviousPage)
+                {
+                    <li class="page-item"><a class="page-link" href="?page=@(Model.PageIndex - 1)">Previous</a></li>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    if (i == Model.PageIndex)
+                    {
+                        <li class="page-item active"><span class="page-link">@i</span></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" href="?page=@i">@i</a></li>
+                    }
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <li class="page-item"><a class="page-link" href="?page=@(Model.PageIndex + 1)">Next</a></li>
+                }
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+<div class="row">
+    <h1>Recently Viewed</h1>
+    <br />
+    @foreach (var product in RecentlyViewed.Take(3))
+    {
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <a href="#"><img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@product.Name"></a>
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <a href="#" @onclick="() => NavigateToDetails(product.Id)">@product.Name</a>
+                    </h4>
+                    <p class="card-text">@product.Description</p>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+
+
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+
+    public int LoadCount { get; set; } = 0;
+
+
+    private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
+
+    private List<ProductDTO> RecentlyViewed { get; set; } = new List<ProductDTO>();
+
+    private bool firstRender = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadRecentlyViewed();
+            Model = await ProductService.GetProductsAsync(Page);
+            this.firstRender = false;
+            StateHasChanged();
+        }
+
+
+
+    }
+
+    private async Task LoadRecentlyViewed()
+    {
+        var localStorageData = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "recentlyViewed");
+        if (!string.IsNullOrEmpty(localStorageData))
+        {
+            var productIds = JsonSerializer.Deserialize<List<int>>(localStorageData);
+            var products = new List<ProductDTO>();
+            foreach (var id in productIds)
+            {
+                var productDTO = await ProductService.GetProductAsync(id);
+
+                if (productDTO != null)
+                {
+                    products.Add(productDTO);
+                }
+            }
+            RecentlyViewed = products;
+        }
+    }
+
+    private async Task NavigateToDetails(int productId)
+    {
+        //
+        var product = Model.Items.FirstOrDefault(p => p.Id == productId);
+        if (product != null)
+        {
+
+            // Navigate to the product details page
+            var url1 = $"/{productId}";
+            NavigationManager.NavigateTo(url1);
+        }
+
+
+    }
+
+    public void Dispose()
+    {
+
+
+    }
+
+}

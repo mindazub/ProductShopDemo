@@ -17,7 +17,8 @@ namespace ProductShopDemo.Repositories
         {
             return await _context.Products
                 .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
+                .ThenInclude(s => s.ProductType)
+                .OrderByDescending(p => p.Id)
                 .Skip((page - 1) * itemsPerPage)
                 .Take(itemsPerPage)
                 .ToListAsync();
@@ -30,10 +31,8 @@ namespace ProductShopDemo.Repositories
 
         public async Task<Product> GetProductAsync(int id)
         {
-            return await _context.Products
-                .Include(p => p.ProductSubtype)
-                    .ThenInclude(s => s.ProductType)
-                .FirstOrDefaultAsync(p => p.Id == id);
+
+            return await _context.Products.Where(p => p.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<Product> CreateProductAsync(Product product)
@@ -44,10 +43,11 @@ namespace ProductShopDemo.Repositories
             return product;
         }
 
-        public async Task UpdateProductAsync(Product product)
+        public async Task<Product> UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
+            return product;
         }
 
         public async Task DeleteProductAsync(int id)

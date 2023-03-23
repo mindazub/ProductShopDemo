@@ -1,48 +1,144 @@
 ﻿@page "/adminproducts/edit/{id:int}"
-@using ProductShopDemo.Models;
-@using ProductShopDemo.Services;
+@using ProductShopDemo.DTO;
+@using ProductShopDemo.Models
+@using ProductShopDemo.Services
 @inject IProductService ProductService
 @inject NavigationManager NavigationManager
 
-<h1>Edit Product</h1>
 
-@if (product == null)
-{
-        <p>Loading...</p>
-}
-else
-{@*
-        <form>
-            <div class="form-group">
-                <label for="nameInput">Name</label>
-                <input type="text" class="form-control" id="nameInput" @bind-value="product.Name" />
-            </div>
-            <div class="form-group">
-                <label for="descriptionInput">Description</label>
-                <input type="text" class="form-control" id="descriptionInput" @bind-value="product.Description" />
-            </div>
-            <div class="form-group">
-                <label for="priceInput">Price</label>
-                <input type="text" class="form-control" id="priceInput" @bind-value="product.Price" />
-            </div>
-            <button type="submit" class="btn btn-primary" @onclick="HandleSubmit">Save</button>
-        </form>*@
-}
+<div class="container">
+
+    <h1>Edit "@productModel.Name" Product</h1>
+    <br />
+    <a href="/adminproducts" class="btn btn-info mb-4">
+        <span class="oi oi-arrow-left" aria-hidden="true"></span>
+        Back
+    </a>
+    <br />
+
+
+    <div class="row">
+        <div class="col-md-6">
+
+            <EditForm Model="@productModel" OnSubmit="OnSubmit">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
+                </div>
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="product.ProductType">Product Type:</label>
+                    <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
+                        <option value="#">--- Select Product Type --- </option>
+                        @foreach (var productType in productTypes)
+                        {
+                            <option value="@productType.Id">@productType.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="product.ProductSubtype">Product Subtype:</label>
+                    <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
+                        @foreach (var productSubtype in subtypesForSelectedType)
+                        {
+                            <option value="@productSubtype.Id">@productSubtype.Name</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </EditForm>
+
+            
+        </div>
+        <div class="col-md-6">
+            <img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@productModel.Name">
+        </div>
+    </div>
+    
+</div>
+
 
 @code {
-    Product product = new Product();
+    private ProductDTO productModel = new ProductDTO();
+    private List<ProductType> productTypes = new List<ProductType>();
+    private List<ProductSubtype> allProductSubtypes = new List<ProductSubtype>();
+    private List<ProductSubtype> subtypesForSelectedType = new List<ProductSubtype>();
+    //private bool ShowError = false;
+    private string ErrorMessage = "";
+
 
     [Parameter]
     public int Id { get; set; }
 
-    protected override async Task OnInitializedAsync()
+
+
+    protected void onError(string message)
     {
-        product = await ProductService.GetProductAsync(Id);
+        //ShowError = true;
+        ErrorMessage = $"Error happened: {message}";
     }
 
-    private async Task HandleSubmit()
+
+    protected override async Task OnInitializedAsync()
     {
-        await ProductService.UpdateProductAsync(product);
-        NavigationManager.NavigateTo("/adminproducts");
+
+        try
+        {
+            productTypes = await ProductService.GetProductTypesAsync();
+            allProductSubtypes = await ProductService.GetProductSubtypesAsync();
+            subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
+
+            productModel = await ProductService.GetProductAsync(Id);
+        } 
+        catch(Exception ex)
+        {
+            if(ex.Message.Contains("Can't find product"))
+            {
+                onError(ex.Message);
+            }
+            else
+            {
+                onError($"Unhandled exception. {ex.Message}");
+            }
+        }    
+
+    }
+
+    private void OnProductTypeChanged(ChangeEventArgs e)
+    {
+        int productTypeId = Convert.ToInt32(e.Value);
+        subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productTypeId).ToList();
+        productModel.ProductSubtype = subtypesForSelectedType.FirstOrDefault();
+    }
+
+    private async Task<ProductDTO> OnSubmit()
+    {
+        if(Id == null)
+        {
+            NavigationManager.NavigateTo("/adminproducts");
+            return null;
+        }
+        else
+        {
+            var productInputDTO = new ProductInputDTO();
+
+            productInputDTO.Name = productModel.Name;
+            productInputDTO.Description = productModel.Description;
+            productInputDTO.Price = productModel.Price;
+            productInputDTO.ProductSubtype = productModel.ProductSubtype;
+            productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
+
+
+            var res = await ProductService.UpdateProductAsync(productInputDTO);
+            NavigationManager.NavigateTo("/adminproducts");
+            return res;
+        }
     }
 }

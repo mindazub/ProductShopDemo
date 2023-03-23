@@ -5,47 +5,67 @@
 @inject IProductService ProductService
 @inject NavigationManager NavigationManager
 
-<div class="col-md-6">
 
-<h3>Create Product</h3>
+<div class="container">
 
+    <h1>Create Product</h1>
+    <br />
+    <a href="/adminproducts" class="btn btn-info mb-4">
+        <span class="oi oi-arrow-left" aria-hidden="true"></span>
+        Back
+    </a>
+    <br />
 
+    <div class="row">
+    <div class="col-md-6">
 
-    <EditForm Model="@productModel" OnSubmit="OnSubmit">
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
+        <EditForm Model="@productModel" OnSubmit="OnSubmit">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <InputText id="name" class="form-control" placeholder="Name" @bind-Value="productModel.Name" />
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
+            </div>
+            <div class="form-group">
+                <label asp-for="product.ProductType">Product Type:</label>
+                <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
+                    <option value="#">--- Select Product Type --- </option>
+                    @foreach (var productType in productTypes)
+                    {
+                        <option value="@productType.Id">@productType.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="product.ProductSubtype">Product Subtype:</label>
+                <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
+                    @foreach (var productSubtype in subtypesForSelectedType)
+                    {
+                        <option value="@productSubtype.Id">@productSubtype.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+
     </div>
-    <div class="form-group">
-        <label for="description">Description:</label>
-        <InputText id="description" class="form-control" placeholder="Description" @bind-Value="productModel.Description" />
+
+        <div class="col-md-6">
+            <img class="card-img-top" src="https://via.placeholder.com/700x400" alt="@productModel.Name">
+        </div>
+
     </div>
-    <div class="form-group">
-        <label for="price">Price:</label>
-        <InputNumber id="price" class="form-control" placeholder="Price" @bind-Value="productModel.Price" />
-    </div>
-    <div class="form-group">
-        <label asp-for="product.ProductType">Product Type:</label>
-        <select class="form-control" id="productType" asp-for="product.ProductType" @onchange="OnProductTypeChanged">
-            <option value="#">--- Select Product Type --- </option>
-            @foreach (var productType in productTypes)
-            {
-                <option value="@productType.Id">@productType.Name</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label asp-for="product.ProductSubtype">Product Subtype:</label>
-        <select class="form-control" id="productSubtype" asp-for="product.ProductSubtype">
-            @foreach (var productSubtype in subtypesForSelectedType)
-            {
-                <option value="@productSubtype.Id">@productSubtype.Name</option>
-            }
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</EditForm>
 </div>
+    
+
+
+
 
 @code {
     private ProductDTO productModel = new ProductDTO();
@@ -60,11 +80,7 @@
         subtypesForSelectedType = allProductSubtypes.Where(s => s.ProductTypeId == productModel.ProductSubtype?.ProductType?.Id).ToList();
     }
 
-    //private async Task CreateProduct()
-    //{
-    //    await ProductService.CreateProductAsync(product);
-    //    NavigationManager.NavigateTo("/adminproducts");
-    //}
+
 
     private void OnProductTypeChanged(ChangeEventArgs e)
     {
@@ -82,10 +98,9 @@
         productInputDTO.Description = productModel.Description;
         productInputDTO.Price = productModel.Price;
         productInputDTO.ProductSubtype = productModel.ProductSubtype;
-        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;
-        
-
+        productInputDTO.ProductSubtypeId = productModel.ProductSubtypeId;        
         var res = await ProductService.CreateProductAsync(productInputDTO);
+        NavigationManager.NavigateTo("/");
         return res;
     }
 

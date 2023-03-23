@@ -8,7 +8,7 @@ namespace ProductShopDemo.Repositories
         Task<int> GetProductsCountAsync();
         Task<Product> GetProductAsync(int id);
         Task<Product> CreateProductAsync(Product product);
-        Task UpdateProductAsync(Product product);
+        Task<Product> UpdateProductAsync(Product product);
         Task DeleteProductAsync(int id);
 
         Task<List<ProductType>> GetProductTypesAsync();
