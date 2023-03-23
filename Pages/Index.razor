@@ -13,6 +13,9 @@
 
 <div class="row">
     <h1>Products List</h1>
+
+    <p>@LoadCount</p>
+
     @foreach (var product in Model.Items.Take(6))
     {
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
@@ -86,9 +89,10 @@
     public int Page { get; set; } = 1;
 
 
+    public int LoadCount { get; set; } = 0;
+
 
     private PaginationResult<Product> Model { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
-    //private PaginationResult<Product> RecentlyViewed { get; set; } = new PaginationResult<Product>(new List<Product>(), 0, 1, 10);
 
     private List<ProductDTO> RecentlyViewed { get; set; } = new List<ProductDTO>();
 
@@ -96,12 +100,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadData();
-    }
-
-    private async Task LoadData()
-    {
-        Model = await ProductService.GetProductsAsync(Page);
+        
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -109,9 +108,13 @@
         if (firstRender)
         {
             await LoadRecentlyViewed();
+            Model = await ProductService.GetProductsAsync(Page);
             this.firstRender = false;
             StateHasChanged();
         }
+
+
+
     }
 
     private async Task LoadRecentlyViewed()
